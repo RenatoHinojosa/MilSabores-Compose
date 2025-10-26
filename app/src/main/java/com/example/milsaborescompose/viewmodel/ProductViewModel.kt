@@ -4,20 +4,33 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.milsaborescompose.data.local.Product
 import com.example.milsaborescompose.data.repository.ProductRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
     val products = repository.products.stateIn(
         viewModelScope,
-        SharingStarted.Companion.WhileSubscribed(),
+        SharingStarted.WhileSubscribed(),
         emptyList()
     )
 
-    fun addProduct(id: String, name: String, description: String, price: Double, image: String, category: String) {
+    private val _selectedProduct = MutableStateFlow<Product?>(null)
+    val selectedProduct = _selectedProduct.asStateFlow()
+
+    fun getProductById(id: Int) {
         viewModelScope.launch {
-            repository.insert(Product(id = id, name = name, description = description, price = price, image = image, category = category))
+            repository.getProductById(id).collect { 
+                _selectedProduct.value = it
+            }
+        }
+    }
+
+    fun addProduct(name: String, description: String, price: Double, image: String, category: String) {
+        viewModelScope.launch {
+            repository.insert(Product(name = name, description = description, price = price, image = image, category = category))
         }
     }
 

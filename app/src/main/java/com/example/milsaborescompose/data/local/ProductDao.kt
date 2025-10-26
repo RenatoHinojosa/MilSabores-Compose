@@ -16,4 +16,16 @@ interface ProductDao {
 
     @Delete
     suspend fun deleteProduct(product: Product)
+
+    @Query("SELECT DISTINCT category FROM products")
+    fun getDistinctCategories(): Flow<List<String>>
+
+    @Query("SELECT * FROM products WHERE category = :categoryName")
+    fun getProductsByCategory(categoryName: String): Flow<List<Product>>
+
+    @Query("SELECT * FROM products WHERE id = :id")
+    fun getProductById(id: Int): Flow<Product>
+
+    @Query("SELECT COUNT(*) FROM products")
+    suspend fun getProductCount(): Int
 }

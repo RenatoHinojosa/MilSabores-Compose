@@ -3,12 +3,12 @@ package com.example.milsaborescompose.data.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "products")
-data class Product(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+@Entity(tableName = "cart_items")
+data class CartItem(
+    @PrimaryKey
+    val productId: Int,
     val name: String,
-    val description: String,
     val price: Double,
     val image: String,
-    val category: String
+    var quantity: Int
 )
