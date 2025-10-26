@@ -27,6 +27,8 @@ import coil.compose.AsyncImage
 import com.example.milsaborescompose.ui.components.MilSaboresTopAppBar
 import com.example.milsaborescompose.viewmodel.ProductViewModel
 import com.example.milsaborescompose.viewmodel.ViewModelFactory
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +76,10 @@ fun CategoryProductsScreen(
                             Spacer(Modifier.height(4.dp))
                             Text(text = product.description, style = MaterialTheme.typography.bodySmall)
                             Spacer(Modifier.height(8.dp))
-                            Text(text = "$${product.price}", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                text = NumberFormat.getCurrencyInstance(Locale("es", "CL")).apply { maximumFractionDigits = 0 }.format(product.price),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 }

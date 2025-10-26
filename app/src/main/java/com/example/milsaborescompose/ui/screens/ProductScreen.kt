@@ -49,7 +49,7 @@ fun ProductScreen(viewModel: ProductViewModel, modifier: Modifier = Modifier) {
             Spacer(Modifier.width(8.dp))
             Button(onClick = {
                 if (name.isNotBlank() && description.isNotBlank() && price.isNotBlank() && image.isNotBlank() && category.isNotBlank()) {
-                    viewModel.addProduct(name, description, price.toDouble(), image, category)
+                    viewModel.addProduct(name, description, price.toInt(), image, category)
                     name = ""
                     description = ""
                     price = ""
@@ -101,7 +101,7 @@ fun ProductScreen(viewModel: ProductViewModel, modifier: Modifier = Modifier) {
             confirmButton = {
                 TextButton(onClick = {
                     productToEdit?.let {
-                        viewModel.updateProduct(it, newName, newDescription, newPrice.toDouble(), newImage, newCategory)
+                        viewModel.updateProduct(it, newName, newDescription, newPrice.toInt(), newImage, newCategory)
                     }
                     showEditDialog = false
                 }) {

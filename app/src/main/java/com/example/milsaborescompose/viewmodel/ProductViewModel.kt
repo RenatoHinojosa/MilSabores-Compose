@@ -28,7 +28,7 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
 
-    fun addProduct(name: String, description: String, price: Double, image: String, category: String) {
+    fun addProduct(name: String, description: String, price: Int, image: String, category: String) {
         viewModelScope.launch {
             repository.insert(Product(name = name, description = description, price = price, image = image, category = category))
         }
@@ -40,7 +40,7 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
 
-    fun updateProduct(product: Product, newName: String, newDescription: String, newPrice: Double, newImage: String, newCategory: String) {
+    fun updateProduct(product: Product, newName: String, newDescription: String, newPrice: Int, newImage: String, newCategory: String) {
         viewModelScope.launch {
             repository.update(product.copy(name = newName, description = newDescription, price = newPrice, image = newImage, category = newCategory))
         }

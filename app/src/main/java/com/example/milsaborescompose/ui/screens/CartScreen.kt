@@ -21,6 +21,7 @@ import com.example.milsaborescompose.data.local.CartItem
 import com.example.milsaborescompose.viewmodel.CartViewModel
 import com.example.milsaborescompose.viewmodel.ViewModelFactory
 import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CartScreen(
@@ -45,7 +46,7 @@ fun CartScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Total: ${NumberFormat.getCurrencyInstance().format(totalPrice)}",
+                            text = "Total: ${NumberFormat.getCurrencyInstance(Locale("es", "CL")).apply { maximumFractionDigits = 0 }.format(totalPrice)}",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -114,7 +115,7 @@ fun CartItemRow(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(item.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(NumberFormat.getCurrencyInstance().format(item.price), style = MaterialTheme.typography.bodyMedium)
+            Text(NumberFormat.getCurrencyInstance(Locale("es", "CL")).apply { maximumFractionDigits = 0 }.format(item.price), style = MaterialTheme.typography.bodyMedium)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onDecrease) {
                     Icon(Icons.Default.Delete, contentDescription = "Disminuir cantidad")
@@ -126,7 +127,7 @@ fun CartItemRow(
             }
         }
         IconButton(onClick = onDelete) {
-            Icon(Icons.Default.Delete, contentDescription = "Eliminar del carrito")
+            Icon(Icons.Outlined.Delete, contentDescription = "Eliminar del carrito")
         }
     }
 }
