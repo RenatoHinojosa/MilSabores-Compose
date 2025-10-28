@@ -17,7 +17,8 @@ class MainActivity : ComponentActivity() {
         val viewModelFactory = ViewModelFactory(
             application.userRepository, 
             application.productRepository,
-            application.cartRepository
+            application.cartRepository,
+            applicationContext
         )
 
         setContent {
