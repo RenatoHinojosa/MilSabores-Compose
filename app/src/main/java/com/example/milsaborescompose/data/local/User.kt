@@ -10,5 +10,6 @@ data class User(
     val correo: String,
     val contrasena: String,
     val telefono: String,
-    val metodoDePago: MetodoDePago
+    val metodoDePago: MetodoDePago,
+    val profilePictureUri: String? = null
 )
