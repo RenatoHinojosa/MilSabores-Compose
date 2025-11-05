@@ -2,12 +2,15 @@ package com.example.milsaborescompose.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Paleta Principal de Mil Sabores
+val CreamPastel = Color(0xFFFFF5E1)      // Fondo principal
+val Chocolate = Color(0xFF8B4513)          // Acento principal, botones
+val SoftPink = Color(0xFFFFC0CB)           // Acento secundario
+val DarkBrown = Color(0xFF5D4037)          // Texto principal
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-val cardBackground = Color(0xFFFF0B0B)
+// Paleta de Soporte
+val Tan = Color(0xFFD2B48C)                // Color terciario, complementario
+val CardSurface = Color(0xFFF8EDD8)        // Fondo para tarjetas y superficies elevadas
+val SurfaceVariantColor = Color(0xFFF0E5CF) // Para elementos sutiles como campos de texto sin foco
+val OutlineColor = Color(0xFFD3C5B4)       // Bordes y divisores
+val OnSurfaceVariantText = Color(0xFF795548) // Texto sobre SurfaceVariant (Marrón suave)

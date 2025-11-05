@@ -40,7 +40,7 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
     )
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.tertiary) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 screens.forEach { screen ->
@@ -84,7 +84,7 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                     UserScreen(
                         viewModel = userViewModel,
                         onSignUpClicked = { navController.navigate("signup") },
-                        onLoginClicked = { navController.navigate("login") } 
+                        onLoginClicked = { navController.navigate("login") }
                     )
                 }
             }
@@ -141,9 +141,9 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                     )
                 }
             }
-             composable("product_management") { 
+             composable("product_management") {
                 val productViewModel: com.example.milsaborescompose.viewmodel.ProductViewModel = viewModel(factory = viewModelFactory)
-                ProductScreen(viewModel = productViewModel) 
+                ProductScreen(viewModel = productViewModel)
             }
         }
     }

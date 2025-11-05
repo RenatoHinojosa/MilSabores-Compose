@@ -48,7 +48,7 @@ fun CartScreen(
             CenterAlignedTopAppBar(
                 title = { Text("Mi Carrito", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                    containerColor = MaterialTheme.colorScheme.tertiary
                 )
             )
         },
