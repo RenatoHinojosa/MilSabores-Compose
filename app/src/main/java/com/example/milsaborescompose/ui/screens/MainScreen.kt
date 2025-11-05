@@ -89,10 +89,13 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                 }
             }
             composable("signup") {
-                SignUpScreen(onSignUp = { nombre, correo, contrasena, telefono, metodoDePago ->
-                    userViewModel.insertUser(User(nombre = nombre, correo = correo, contrasena = contrasena, telefono = telefono, metodoDePago = metodoDePago))
-                    navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
-                })
+                SignUpScreen(
+                    onSignUp = { nombre, correo, contrasena, telefono, metodoDePago ->
+                        userViewModel.insertUser(User(nombre = nombre, correo = correo, contrasena = contrasena, telefono = telefono, metodoDePago = metodoDePago))
+                        navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
+                    },
+                    navController = navController
+                )
             }
             composable("login") {
                 LoginScreen(
@@ -105,7 +108,8 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
                     },
                     onLoginSuccess = {
                         navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
-                    }
+                    },
+                    navController = navController
                 )
             }
             composable(
