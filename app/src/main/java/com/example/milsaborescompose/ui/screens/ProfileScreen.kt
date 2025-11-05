@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -204,11 +205,38 @@ fun ProfileScreen(userViewModel: UserViewModel, onLogout: () -> Unit) {
                         Text("Cambiar foto")
                     }
                     Spacer(Modifier.height(16.dp))
-                    TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
+                    TextField(
+                        value = nombre, 
+                        onValueChange = { nombre = it }, 
+                        label = { Text("Nombre") }, 
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
                     Spacer(Modifier.height(8.dp))
-                    TextField(value = correo, onValueChange = { correo = it }, label = { Text("Correo electrónico") }, modifier = Modifier.fillMaxWidth())
+                    TextField(
+                        value = correo, 
+                        onValueChange = { correo = it }, 
+                        label = { Text("Correo electrónico") }, 
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
                     Spacer(Modifier.height(8.dp))
-                    TextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth())
+                    TextField(
+                        value = telefono, 
+                        onValueChange = { telefono = it }, 
+                        label = { Text("Teléfono") }, 
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
                     Spacer(Modifier.height(16.dp))
                     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }, modifier = Modifier.fillMaxWidth()) {
                         TextField(
@@ -217,9 +245,17 @@ fun ProfileScreen(userViewModel: UserViewModel, onLogout: () -> Unit) {
                             readOnly = true,
                             label = { Text("Método de pago") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
                         )
-                        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        ExposedDropdownMenu(
+                            expanded = expanded, 
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
                             MetodoDePago.values().forEach { metodo ->
                                 DropdownMenuItem(
                                     text = { Text(metodo.displayName) },
@@ -235,7 +271,10 @@ fun ProfileScreen(userViewModel: UserViewModel, onLogout: () -> Unit) {
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         currentUser?.let {
@@ -253,8 +292,7 @@ fun ProfileScreen(userViewModel: UserViewModel, onLogout: () -> Unit) {
 
         if (isInEditMode) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                OutlinedButton(onClick = {
-                    currentUser?.let {
+                OutlinedButton(onClick = {                    currentUser?.let {
                         nombre = it.nombre
                         correo = it.correo
                         telefono = it.telefono
@@ -264,8 +302,7 @@ fun ProfileScreen(userViewModel: UserViewModel, onLogout: () -> Unit) {
                     isInEditMode = false
                 }) { Text("Cancelar") }
                 Spacer(Modifier.width(16.dp))
-                Button(onClick = {
-                    currentUser?.let {
+                Button(onClick = {                    currentUser?.let {
                         val updatedUser = it.copy(
                             nombre = nombre,
                             correo = correo,

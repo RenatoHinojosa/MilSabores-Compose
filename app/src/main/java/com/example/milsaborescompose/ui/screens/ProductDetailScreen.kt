@@ -81,7 +81,10 @@ fun ProductDetailScreen(
                     modifier = Modifier
                         .fillMaxSize(),
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
                     Column(
                         modifier = Modifier

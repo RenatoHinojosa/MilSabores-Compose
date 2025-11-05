@@ -1,6 +1,7 @@
 package com.example.milsaborescompose.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +65,11 @@ fun SignUpScreen(
             },
             label = { Text("Nombre") },
             isError = nombreError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
         AnimatedVisibility(visible = nombreError) {
             Text("El nombre no puede estar vacío", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -77,7 +83,11 @@ fun SignUpScreen(
             },
             label = { Text("Correo electrónico") },
             isError = correoError,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
         AnimatedVisibility(visible = correoError) {
             Text("El correo debe ser válido", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -92,7 +102,11 @@ fun SignUpScreen(
             label = { Text("Contraseña") },
             isError = contrasenaError,
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
         Spacer(Modifier.height(8.dp))
         TextField(
@@ -104,7 +118,11 @@ fun SignUpScreen(
             label = { Text("Confirmar contraseña") },
             isError = contrasenaError,
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
         AnimatedVisibility(visible = contrasenaError) {
             Text("Las contraseñas no coinciden", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -114,7 +132,11 @@ fun SignUpScreen(
             value = telefono,
             onValueChange = { telefono = it },
             label = { Text("Teléfono (opcional)") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
         Spacer(Modifier.height(16.dp))
 
@@ -129,12 +151,17 @@ fun SignUpScreen(
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
             )
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 MetodoDePago.values().forEach { metodo ->
                     DropdownMenuItem(
