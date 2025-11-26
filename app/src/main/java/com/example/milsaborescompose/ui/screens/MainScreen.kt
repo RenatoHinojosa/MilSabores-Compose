@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,15 +23,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.milsaborescompose.data.local.User
 import com.example.milsaborescompose.viewmodel.UserViewModel
 import com.example.milsaborescompose.viewmodel.ViewModelFactory
 
 @Composable
-fun MainScreen(viewModelFactory: ViewModelFactory) {
+fun MainScreen() {
     val navController = rememberNavController()
-    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
-    val loggedInUserId by userViewModel.loggedInUserId.collectAsState()
+    val context = LocalContext.current
+    val viewModelFactory = remember { ViewModelFactory(context) }
 
     val screens = listOf(
         Screen.Home,
@@ -38,6 +38,7 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
         Screen.Cart,
         Screen.Profile
     )
+
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.tertiary) {
@@ -67,81 +68,88 @@ fun MainScreen(viewModelFactory: ViewModelFactory) {
     ) { innerPadding ->
         NavHost(navController, startDestination = Screen.Home.route, Modifier.padding(innerPadding)) {
             composable(Screen.Home.route) { HomeScreen() }
+
             composable(Screen.Catalog.route) {
                 CatalogScreen(
                     viewModelFactory = viewModelFactory,
-                    onCategoryClick = { categoryName ->
-                        navController.navigate("category/$categoryName")
-                    },
-                    onAddProductClick = { navController.navigate("product_management") }
+                    onCategoryClick = { categoryId, categoryName ->
+                        navController.navigate("category/$categoryId/$categoryName")
+                    }
                 )
             }
+
             composable(Screen.Cart.route) { CartScreen(navController = navController, viewModelFactory = viewModelFactory) }
+
             composable(Screen.Profile.route) {
-                if (loggedInUserId != null) {
-                    ProfileScreen(userViewModel = userViewModel, onLogout = { userViewModel.logout() })
-                } else {
-                    UserScreen(
-                        viewModel = userViewModel,
-                        onSignUpClicked = { navController.navigate("signup") },
-                        onLoginClicked = { navController.navigate("login") }
-                    )
-                }
+                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
+                val uiState by userViewModel.uiState.collectAsState()
+                
+                ProfileScreen(
+                    uiState = uiState,
+                    onLogout = { userViewModel.logout() },
+                    onLogoutSuccess = { navController.navigate(Screen.Home.route){ popUpTo(Screen.Home.route){ inclusive = true } } },
+                    navController = navController
+                )
             }
+
             composable("signup") {
+                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
+                val paymentViewModel: com.example.milsaborescompose.viewmodel.PaymentMethodViewModel = viewModel(factory = viewModelFactory)
+
                 SignUpScreen(
-                    onSignUp = { nombre, correo, contrasena, telefono, metodoDePago ->
-                        userViewModel.insertUser(User(nombre = nombre, correo = correo, contrasena = contrasena, telefono = telefono, metodoDePago = metodoDePago))
-                        navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
-                    },
+                    userUiState = userViewModel.uiState.collectAsState().value,
+                    paymentMethodUiState = paymentViewModel.uiState.collectAsState().value,
+                    onRegister = { registerRequest -> userViewModel.register(registerRequest) },
+                    onRegistrationSuccess = { navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } } },
+                    onErrorDismiss = { userViewModel.clearRegistrationError() },
                     navController = navController
                 )
             }
+
             composable("login") {
+                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
                 LoginScreen(
-                    onLogin = { email, password ->
-                        userViewModel.login(email, password) { success ->
-                            if (success) {
-                                navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
-                            }
-                        }
-                    },
-                    onLoginSuccess = {
-                        navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } }
-                    },
+                    uiState = userViewModel.uiState.collectAsState().value,
+                    onLogin = { loginRequest -> userViewModel.login(loginRequest) },
+                    onLoginSuccess = { navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } } },
+                    onErrorDismiss = { userViewModel.clearLoginError() },
                     navController = navController
                 )
             }
+
             composable(
-                route = "category/{categoryName}",
-                arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+                route = "category/{categoryId}/{categoryName}",
+                arguments = listOf(
+                    navArgument("categoryId") { type = NavType.LongType },
+                    navArgument("categoryName") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
-                val categoryName = backStackEntry.arguments?.getString("categoryName")
-                if (categoryName != null) {
-                    CategoryProductsScreen(
-                        categoryName = categoryName,
-                        viewModelFactory = viewModelFactory,
-                        navController = navController,
-                        onProductClick = { productId ->
-                            navController.navigate("product/$productId")
-                        }
-                    )
-                }
+                val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: 0L
+                val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                CategoryProductsScreen(
+                    categoryId = categoryId,
+                    categoryName = categoryName,
+                    viewModelFactory = viewModelFactory,
+                    navController = navController,
+                    onProductClick = { productId ->
+                        navController.navigate("product/$productId")
+                    }
+                )
             }
+
             composable(
                 route = "product/{productId}",
-                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                arguments = listOf(navArgument("productId") { type = NavType.LongType })
             ) { backStackEntry ->
-                val productId = backStackEntry.arguments?.getInt("productId")
-                if (productId != null) {
-                    ProductDetailScreen(
-                        productId = productId,
-                        viewModelFactory = viewModelFactory,
-                        navController = navController
-                    )
-                }
+                val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
+                ProductDetailScreen(
+                    productId = productId,
+                    viewModelFactory = viewModelFactory,
+                    navController = navController
+                )
             }
-             composable("product_management") {
+
+            composable("product_management") {
                 val productViewModel: com.example.milsaborescompose.viewmodel.ProductViewModel = viewModel(factory = viewModelFactory)
                 ProductScreen(viewModel = productViewModel)
             }

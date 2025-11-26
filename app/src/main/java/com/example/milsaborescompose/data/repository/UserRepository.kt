@@ -1,11 +1,26 @@
 package com.example.milsaborescompose.data.repository
 
-import com.example.milsaborescompose.data.local.User
-import  com.example.milsaborescompose.data.local.UserDao
-import kotlinx.coroutines.flow.Flow
-class UserRepository(private val dao: UserDao) {
-    val users: Flow<List<User>> = dao.getAllUsers()
-    suspend fun insert(user: User) = dao.insertUser(user)
-    suspend fun update(user: User) = dao.updateUser(user)
-    suspend fun delete(user: User) = dao.deleteUser(user)
+import com.example.milsaborescompose.data.model.User
+import com.example.milsaborescompose.data.model.auth.LoginRequest
+import com.example.milsaborescompose.data.model.auth.LoginResponse
+import com.example.milsaborescompose.data.model.auth.RegisterRequest
+import com.example.milsaborescompose.data.remote.UserService
+
+class UserRepository(private val userService: UserService) {
+
+    suspend fun login(loginRequest: LoginRequest): LoginResponse {
+        return userService.login(loginRequest)
+    }
+
+    suspend fun register(registerRequest: RegisterRequest): LoginResponse {
+        return userService.register(registerRequest)
+    }
+
+    suspend fun getUserById(id: Long): User {
+        return userService.getUserById(id)
+    }
+
+    suspend fun updateUser(id: Long, user: User): User {
+        return userService.updateUser(id, user)
+    }
 }

@@ -2,7 +2,7 @@ package com.example.milsaborescompose.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.milsaborescompose.data.local.CartItem
+import com.example.milsaborescompose.data.model.CartItem
 import com.example.milsaborescompose.data.repository.CartRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

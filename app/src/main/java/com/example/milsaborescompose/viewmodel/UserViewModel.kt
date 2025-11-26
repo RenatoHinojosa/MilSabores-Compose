@@ -2,71 +2,103 @@ package com.example.milsaborescompose.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.milsaborescompose.data.local.MetodoDePago
-import com.example.milsaborescompose.data.local.SessionManager
-import com.example.milsaborescompose.data.local.User
+import com.example.milsaborescompose.data.model.User
+import com.example.milsaborescompose.data.model.auth.LoginRequest
+import com.example.milsaborescompose.data.model.auth.RegisterRequest
+import com.example.milsaborescompose.data.repository.SessionRepository
 import com.example.milsaborescompose.data.repository.UserRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class UserUiState(
+    val isLoading: Boolean = false,
+    val currentUser: User? = null,
+    val loginError: String? = null,
+    val registrationError: String? = null,
+    val isLoggedIn: Boolean = false
+)
+
 class UserViewModel(
-    private val repository: UserRepository,
-    private val sessionManager: SessionManager
+    private val userRepository: UserRepository,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
-    val users = repository.users.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        emptyList()
-    )
+    private val _uiState = MutableStateFlow(UserUiState())
+    val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
 
-    val loggedInUserId = sessionManager.getUserId().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        null
-    )
-
-    fun addUser(nombre: String, correo: String, contrasena: String, telefono: String, metodoDePago: MetodoDePago) {
+    init {
         viewModelScope.launch {
-            repository.insert(User(nombre = nombre, correo = correo, contrasena = contrasena, telefono = telefono, metodoDePago = metodoDePago))
+            sessionRepository.getSession().collect { session ->
+                if (session != null && !_uiState.value.isLoggedIn) {
+                    try {
+                        _uiState.update { it.copy(isLoading = true) }
+                        val user = userRepository.getUserById(session.userId)
+                        _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
+                    } catch (e: Exception) {
+                        logout()
+                        _uiState.update { it.copy(isLoading = false, loginError = "Failed to restore session.") }
+                    }
+                } else if (session == null) {
+                    _uiState.update { it.copy(currentUser = null, isLoggedIn = false) }
+                }
+            }
         }
     }
 
-    fun insertUser(user: User) {
+    fun login(loginRequest: LoginRequest) {
         viewModelScope.launch {
-            repository.insert(user)
+            _uiState.update { it.copy(isLoading = true, loginError = null) }
+            try {
+                val response = userRepository.login(loginRequest)
+                sessionRepository.saveSession(response.id, response.token)
+                val user = userRepository.getUserById(response.id) // Get full user details
+                 _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, loginError = "Login failed: ${e.message}") }
+            }
         }
     }
 
-    fun deleteUser(user: User) {
+    fun register(registerRequest: RegisterRequest) {
         viewModelScope.launch {
-            repository.delete(user)
+            _uiState.update { it.copy(isLoading = true, registrationError = null) }
+            try {
+                val response = userRepository.register(registerRequest)
+                sessionRepository.saveSession(response.id, response.token)
+                val user = userRepository.getUserById(response.id)
+                _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, registrationError = "Registration failed: ${e.message}") }
+            }
         }
     }
 
     fun updateUser(user: User) {
         viewModelScope.launch {
-            repository.update(user)
-        }
-    }
-
-    fun login(correo: String, contrasena: String, onLoginResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val user = repository.users.first().find { it.correo == correo && it.contrasena == contrasena }
-            if (user != null) {
-                sessionManager.saveSession(user.id)
-                onLoginResult(true)
-            } else {
-                onLoginResult(false)
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val updatedUser = userRepository.updateUser(user.id, user)
+                _uiState.update { it.copy(isLoading = false, currentUser = updatedUser) }
+            } catch (e: Exception) {
+                // Handle update error
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
-            sessionManager.clearSession()
+            sessionRepository.clearSession()
         }
+    }
+    
+    fun clearLoginError() {
+        _uiState.update { it.copy(loginError = null) }
+    }
+
+    fun clearRegistrationError() {
+        _uiState.update { it.copy(registrationError = null) }
     }
 }

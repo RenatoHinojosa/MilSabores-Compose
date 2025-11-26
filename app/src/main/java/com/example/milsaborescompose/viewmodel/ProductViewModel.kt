@@ -2,47 +2,84 @@ package com.example.milsaborescompose.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.milsaborescompose.data.local.Product
+import com.example.milsaborescompose.data.model.Product
 import com.example.milsaborescompose.data.repository.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class ProductUiState(
+    val isLoading: Boolean = false,
+    val products: List<Product> = emptyList(),
+    val selectedProduct: Product? = null,
+    val error: String? = null
+)
+
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
-    val products = repository.products.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(),
-        emptyList()
-    )
 
-    private val _selectedProduct = MutableStateFlow<Product?>(null)
-    val selectedProduct = _selectedProduct.asStateFlow()
+    private val _uiState = MutableStateFlow(ProductUiState())
+    val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
 
-    fun getProductById(id: Int) {
+    fun getProductsByCategory(categoryId: Long) {
         viewModelScope.launch {
-            repository.getProductById(id).collect { 
-                _selectedProduct.value = it
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val productList = repository.getProductsByCategory(categoryId)
+                _uiState.update { it.copy(isLoading = false, products = productList) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load products: ${e.message}") }
             }
         }
     }
 
-    fun addProduct(name: String, description: String, price: Int, image: String, category: String) {
+    fun getProductById(id: Long) {
         viewModelScope.launch {
-            repository.insert(Product(name = name, description = description, price = price, image = image, category = category))
+            _uiState.update { it.copy(isLoading = true, error = null, selectedProduct = null) }
+            try {
+                val product = repository.getProductById(id)
+                _uiState.update { it.copy(isLoading = false, selectedProduct = product) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load product details: ${e.message}") }
+            }
         }
     }
 
-    fun deleteProduct(product: Product) {
+    fun createProduct(product: Product) {
         viewModelScope.launch {
-            repository.delete(product)
+            try {
+                repository.createProduct(product)
+                // Optionally, refresh the product list after creation
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to create product: ${e.message}") }
+            }
         }
     }
 
-    fun updateProduct(product: Product, newName: String, newDescription: String, newPrice: Int, newImage: String, newCategory: String) {
+    fun updateProduct(product: Product) {
         viewModelScope.launch {
-            repository.update(product.copy(name = newName, description = newDescription, price = newPrice, image = newImage, category = newCategory))
+            try {
+                repository.updateProduct(product.id, product)
+                 _uiState.update { it.copy(selectedProduct = product) } // Optimistic update
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to update product: ${e.message}") }
+            }
         }
+    }
+
+    fun deleteProduct(id: Long) {
+        viewModelScope.launch {
+            try {
+                repository.deleteProduct(id)
+                // Optionally, refresh the product list or navigate away
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to delete product: ${e.message}") }
+            }
+        }
+    }
+    
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }
