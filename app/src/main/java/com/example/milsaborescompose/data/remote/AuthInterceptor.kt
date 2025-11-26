@@ -10,10 +10,12 @@ class AuthInterceptor(private val sessionRepository: SessionRepository) : Interc
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
+        val path = request.url.encodedPath
 
         // No añadir token a las rutas de login/registro
-        if (request.url.encodedPath.contains("api/auth/login") || 
-            request.url.encodedPath.contains("api/auth/register")) {
+        // Usamos ignoreCase = true para ser más permisivos
+        if (path.contains("api/auth/login", ignoreCase = true) ||
+            path.contains("api/auth/register", ignoreCase = true)) {
             return chain.proceed(request)
         }
 

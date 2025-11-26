@@ -152,16 +152,23 @@ fun SignUpScreen(
                 // --- Botón de Registro ---
                 Button(
                     onClick = {
+                        // Regex para validar email
+                        val emailRegex = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$".toRegex()
+
                         if (nombre.isBlank() || correo.isBlank() || contrasena.isBlank() || selectedPaymentMethod == null) {
-                            formError = "Por favor, completa todos los campos obligatorios."
+                            formError = "Por favor completa todos los campos obligatorios."
+                        } else if (!emailRegex.matches(correo)) {
+                            formError = "Por favor ingresa un correo electrónico válido."
+                        } else if (contrasena.length < 6) {
+                            formError = "La contraseña debe tener al menos 6 caracteres."
                         } else {
                             onRegister(
                                 RegisterRequest(
                                     name = nombre,
                                     email = correo,
                                     password = contrasena,
-                                    number = telefono.takeIf { it.isNotBlank() },
-                                    address = direccion.takeIf { it.isNotBlank() },
+                                    number = telefono,
+                                    address = direccion,
                                     paymentMethodId = selectedPaymentMethod!!.id
                                 )
                             )

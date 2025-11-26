@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
@@ -29,9 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,44 +43,23 @@ fun HomeScreen() {
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        // Hero Section
+        // Hero Section (Logo limpio)
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp),
-                contentAlignment = Alignment.BottomStart
+                    .height(300.dp)
+                    .background(MaterialTheme.colorScheme.surface), // Fondo limpio
+                contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Pastelería 1000 Sabores",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                Box(
+                    contentDescription = "Logo Pastelería 1000 Sabores",
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
-                                startY = 300f
-                            )
-                        )
+                        .padding(24.dp), // Un poco de espacio para que no toque los bordes
+                    contentScale = ContentScale.Fit // Para ver el logo completo sin cortes
                 )
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Pastelería 1000 Sabores",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        ),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Celebrando 50 años de tradición y sabor en Chile.",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
-                    )
-                }
             }
         }
 

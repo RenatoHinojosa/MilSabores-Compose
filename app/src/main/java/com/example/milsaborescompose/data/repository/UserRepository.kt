@@ -1,6 +1,7 @@
 package com.example.milsaborescompose.data.repository
 
 import com.example.milsaborescompose.data.model.User
+import com.example.milsaborescompose.data.model.UserUpdateRequest
 import com.example.milsaborescompose.data.model.auth.LoginRequest
 import com.example.milsaborescompose.data.model.auth.LoginResponse
 import com.example.milsaborescompose.data.model.auth.RegisterRequest
@@ -21,6 +22,13 @@ class UserRepository(private val userService: UserService) {
     }
 
     suspend fun updateUser(id: Long, user: User): User {
-        return userService.updateUser(id, user)
+        val request = UserUpdateRequest(
+            name = user.name,
+            mail = user.mail,
+            address = user.address,
+            number = user.number,
+            paymentMethod = user.paymentMethod
+        )
+        return userService.updateUser(id, request)
     }
 }

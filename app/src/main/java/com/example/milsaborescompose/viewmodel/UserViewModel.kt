@@ -16,8 +16,10 @@ import kotlinx.coroutines.launch
 data class UserUiState(
     val isLoading: Boolean = false,
     val currentUser: User? = null,
+    val profilePictureUri: String? = null,
     val loginError: String? = null,
     val registrationError: String? = null,
+    val updateError: String? = null, // Nuevo campo para errores de actualización
     val isLoggedIn: Boolean = false
 )
 
@@ -32,17 +34,38 @@ class UserViewModel(
     init {
         viewModelScope.launch {
             sessionRepository.getSession().collect { session ->
-                if (session != null && !_uiState.value.isLoggedIn) {
-                    try {
-                        _uiState.update { it.copy(isLoading = true) }
-                        val user = userRepository.getUserById(session.userId)
-                        _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
-                    } catch (e: Exception) {
-                        logout()
-                        _uiState.update { it.copy(isLoading = false, loginError = "Failed to restore session.") }
+                if (_uiState.value.isLoggedIn && _uiState.value.currentUser != null) {
+                   if (session == null) {
+                       return@collect
+                   }
+                   if (session.profilePictureUri != _uiState.value.profilePictureUri) {
+                       _uiState.update { it.copy(profilePictureUri = session.profilePictureUri) }
+                   }
+                }
+
+                if (session != null) {
+                     val currentProfilePic = session.profilePictureUri
+                     
+                    if (!_uiState.value.isLoggedIn) {
+                        try {
+                            _uiState.update { it.copy(isLoading = true) }
+                            val user = userRepository.getUserById(session.userId)
+                            _uiState.update { it.copy(
+                                isLoading = false, 
+                                currentUser = user, 
+                                isLoggedIn = true,
+                                profilePictureUri = currentProfilePic
+                            ) }
+                        } catch (e: Exception) {
+                            _uiState.update { it.copy(isLoading = false, isLoggedIn = false, currentUser = null) }
+                        }
+                    } else {
+                        if (_uiState.value.profilePictureUri != currentProfilePic) {
+                             _uiState.update { it.copy(profilePictureUri = currentProfilePic) }
+                        }
                     }
                 } else if (session == null) {
-                    _uiState.update { it.copy(currentUser = null, isLoggedIn = false) }
+                    _uiState.update { it.copy(currentUser = null, isLoggedIn = false, profilePictureUri = null) }
                 }
             }
         }
@@ -53,11 +76,22 @@ class UserViewModel(
             _uiState.update { it.copy(isLoading = true, loginError = null) }
             try {
                 val response = userRepository.login(loginRequest)
+                
+                val user = User(
+                    id = response.id,
+                    name = response.name,
+                    mail = response.email,
+                    password = "",
+                    address = response.address,
+                    number = response.number,
+                    paymentMethod = response.paymentMethod
+                )
+                
+                _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
                 sessionRepository.saveSession(response.id, response.token)
-                val user = userRepository.getUserById(response.id) // Get full user details
-                 _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
+                
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, loginError = "Login failed: ${e.message}") }
+                _uiState.update { it.copy(isLoading = false, loginError = "Error al iniciar sesión: ${e.message}") }
             }
         }
     }
@@ -67,29 +101,49 @@ class UserViewModel(
             _uiState.update { it.copy(isLoading = true, registrationError = null) }
             try {
                 val response = userRepository.register(registerRequest)
-                sessionRepository.saveSession(response.id, response.token)
-                val user = userRepository.getUserById(response.id)
+                
+                val user = User(
+                    id = response.id,
+                    name = response.name,
+                    mail = response.email,
+                    password = "",
+                    address = response.address,
+                    number = response.number,
+                    paymentMethod = response.paymentMethod
+                )
+                
                 _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
+                sessionRepository.saveSession(response.id, response.token)
+                
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, registrationError = "Registration failed: ${e.message}") }
+                _uiState.update { it.copy(isLoading = false, registrationError = "Error al registrar: ${e.message}") }
             }
         }
     }
 
     fun updateUser(user: User) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, updateError = null) }
             try {
                 val updatedUser = userRepository.updateUser(user.id, user)
                 _uiState.update { it.copy(isLoading = false, currentUser = updatedUser) }
             } catch (e: Exception) {
-                // Handle update error
+                 // Ahora capturamos y mostramos el error
+                 _uiState.update { it.copy(isLoading = false, updateError = "Fallo al actualizar: ${e.message}") }
             }
+        }
+    }
+
+    fun saveProfilePicture(uri: String) {
+        viewModelScope.launch {
+            sessionRepository.saveProfilePicture(uri)
+            _uiState.update { it.copy(profilePictureUri = uri) }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
+            _uiState.update { it.copy(currentUser = null, isLoggedIn = false, profilePictureUri = null) }
             sessionRepository.clearSession()
         }
     }
@@ -100,5 +154,9 @@ class UserViewModel(
 
     fun clearRegistrationError() {
         _uiState.update { it.copy(registrationError = null) }
+    }
+    
+    fun clearUpdateError() {
+        _uiState.update { it.copy(updateError = null) }
     }
 }

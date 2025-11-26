@@ -1,6 +1,7 @@
 package com.example.milsaborescompose.data.remote
 
 import com.example.milsaborescompose.data.model.User
+import com.example.milsaborescompose.data.model.UserUpdateRequest
 import com.example.milsaborescompose.data.model.auth.LoginRequest
 import com.example.milsaborescompose.data.model.auth.LoginResponse
 import com.example.milsaborescompose.data.model.auth.RegisterRequest
@@ -18,9 +19,9 @@ interface UserService {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
 
-    @GET("api/users/{id}")
+    @GET("api/user/{id}")
     suspend fun getUserById(@Path("id") id: Long): User
 
-    @PUT("api/users/{id}")
-    suspend fun updateUser(@Path("id") id: Long, @Body user: User): User
+    @PUT("api/user/{id}")
+    suspend fun updateUser(@Path("id") id: Long, @Body user: UserUpdateRequest): User
 }

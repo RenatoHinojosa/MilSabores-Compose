@@ -25,12 +25,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.milsaborescompose.viewmodel.UserViewModel
 import com.example.milsaborescompose.viewmodel.ViewModelFactory
+import com.example.milsaborescompose.viewmodel.PaymentMethodViewModel
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val viewModelFactory = remember { ViewModelFactory(context) }
+    
+    val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
 
     val screens = listOf(
         Screen.Home,
@@ -81,37 +84,52 @@ fun MainScreen() {
             composable(Screen.Cart.route) { CartScreen(navController = navController, viewModelFactory = viewModelFactory) }
 
             composable(Screen.Profile.route) {
-                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
                 val uiState by userViewModel.uiState.collectAsState()
+                // Necesitamos los métodos de pago para el modo edición
+                val paymentViewModel: PaymentMethodViewModel = viewModel(factory = viewModelFactory)
+                val paymentUiState by paymentViewModel.uiState.collectAsState()
                 
                 ProfileScreen(
                     uiState = uiState,
+                    paymentUiState = paymentUiState,
                     onLogout = { userViewModel.logout() },
-                    onLogoutSuccess = { navController.navigate(Screen.Home.route){ popUpTo(Screen.Home.route){ inclusive = true } } },
+                    onLogoutSuccess = { 
+                        navController.navigate(Screen.Home.route) { 
+                            popUpTo(Screen.Home.route) { inclusive = true } 
+                        } 
+                    },
+                    onUpdateUser = { user -> userViewModel.updateUser(user) },
+                    onSaveProfilePicture = { uri -> userViewModel.saveProfilePicture(uri) },
                     navController = navController
                 )
             }
 
             composable("signup") {
-                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
-                val paymentViewModel: com.example.milsaborescompose.viewmodel.PaymentMethodViewModel = viewModel(factory = viewModelFactory)
+                val paymentViewModel: PaymentMethodViewModel = viewModel(factory = viewModelFactory)
 
                 SignUpScreen(
                     userUiState = userViewModel.uiState.collectAsState().value,
                     paymentMethodUiState = paymentViewModel.uiState.collectAsState().value,
                     onRegister = { registerRequest -> userViewModel.register(registerRequest) },
-                    onRegistrationSuccess = { navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } } },
+                    onRegistrationSuccess = { 
+                        navController.navigate(Screen.Profile.route) {
+                            popUpTo(Screen.Home.route)
+                        } 
+                    },
                     onErrorDismiss = { userViewModel.clearRegistrationError() },
                     navController = navController
                 )
             }
 
             composable("login") {
-                val userViewModel: UserViewModel = viewModel(factory = viewModelFactory)
                 LoginScreen(
                     uiState = userViewModel.uiState.collectAsState().value,
                     onLogin = { loginRequest -> userViewModel.login(loginRequest) },
-                    onLoginSuccess = { navController.navigate(Screen.Profile.route) { popUpTo(Screen.Profile.route) { inclusive = true } } },
+                    onLoginSuccess = { 
+                        navController.navigate(Screen.Profile.route) {
+                             popUpTo(Screen.Home.route)
+                        } 
+                    },
                     onErrorDismiss = { userViewModel.clearLoginError() },
                     navController = navController
                 )
