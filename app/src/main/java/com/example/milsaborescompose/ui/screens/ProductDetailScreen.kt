@@ -83,9 +83,9 @@ fun ProductDetailScreen(
                 canNavigateBack = true,
                 navigateUp = { navController.navigateUp() },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -158,10 +158,10 @@ fun ProductDetailScreen(
                             Button(
                                 onClick = {
                                     val cartItem = CartItem(
-                                        productId = product.id.toInt(), // Ensure your CartItem model is consistent
+                                        productId = product.id.toInt(), 
                                         name = product.name,
                                         price = product.price,
-                                        image = imageUrl, // Use resolved image URL
+                                        image = imageUrl,
                                         quantity = quantity
                                     )
                                     cartViewModel.addToCart(cartItem)
