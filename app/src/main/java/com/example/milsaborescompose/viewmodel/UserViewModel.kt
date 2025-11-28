@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class UserUiState(
     val isLoading: Boolean = false,
@@ -115,6 +116,13 @@ class UserViewModel(
                 _uiState.update { it.copy(isLoading = false, currentUser = user, isLoggedIn = true) }
                 sessionRepository.saveSession(response.id, response.token)
                 
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                if (e.code() == 400 && errorBody?.contains("El email ya está registrado") == true) {
+                    _uiState.update { it.copy(isLoading = false, registrationError = "Correo inválido o ya ingresado") }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, registrationError = "Error al registrar: ${e.message()}") }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, registrationError = "Error al registrar: ${e.message}") }
             }

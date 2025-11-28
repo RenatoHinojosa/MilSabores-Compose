@@ -1,5 +1,6 @@
 package com.example.milsaborescompose.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +55,7 @@ fun SignUpScreen(
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
+    var confirmarContrasena by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var selectedPaymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
@@ -79,6 +82,12 @@ fun SignUpScreen(
     }
 
     // === UI ===
+    val textFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = MaterialTheme.colorScheme.surface,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+    )
+
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
@@ -109,15 +118,17 @@ fun SignUpScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 // --- Campos de texto ---
-                TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading)
+                TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
                 Spacer(Modifier.height(8.dp))
-                TextField(value = correo, onValueChange = { correo = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading)
+                TextField(value = correo, onValueChange = { correo = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
                 Spacer(Modifier.height(8.dp))
-                TextField(value = contrasena, onValueChange = { contrasena = it }, label = { Text("Contraseña") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), enabled = !isLoading)
+                TextField(value = contrasena, onValueChange = { contrasena = it }, label = { Text("Contraseña") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
                 Spacer(Modifier.height(8.dp))
-                TextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading)
+                TextField(value = confirmarContrasena, onValueChange = { confirmarContrasena = it }, label = { Text("Confirmar Contraseña") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
                 Spacer(Modifier.height(8.dp))
-                TextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading)
+                TextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
+                Spacer(Modifier.height(8.dp))
+                TextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth(), enabled = !isLoading, colors = textFieldColors)
                 Spacer(Modifier.height(16.dp))
 
                 // --- Selector de Método de Pago ---
@@ -133,9 +144,14 @@ fun SignUpScreen(
                         label = { Text("Método de Pago") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isPaymentMethodMenuExpanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        enabled = !isLoading
+                        enabled = !isLoading,
+                        colors = textFieldColors
                     )
-                    ExposedDropdownMenu(expanded = isPaymentMethodMenuExpanded, onDismissRequest = { isPaymentMethodMenuExpanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = isPaymentMethodMenuExpanded,
+                        onDismissRequest = { isPaymentMethodMenuExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
                         paymentMethodUiState.paymentMethods.forEach { method ->
                             DropdownMenuItem(
                                 text = { Text(method.name) },
@@ -155,12 +171,15 @@ fun SignUpScreen(
                         // Regex para validar email
                         val emailRegex = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$".toRegex()
 
+
                         if (nombre.isBlank() || correo.isBlank() || contrasena.isBlank() || selectedPaymentMethod == null) {
                             formError = "Por favor completa todos los campos obligatorios."
                         } else if (!emailRegex.matches(correo)) {
                             formError = "Por favor ingresa un correo electrónico válido."
                         } else if (contrasena.length < 6) {
                             formError = "La contraseña debe tener al menos 6 caracteres."
+                        } else if (contrasena != confirmarContrasena) {
+                            formError = "Las contraseñas no coinciden."
                         } else {
                             onRegister(
                                 RegisterRequest(
