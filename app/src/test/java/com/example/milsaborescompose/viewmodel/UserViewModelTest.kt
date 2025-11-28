@@ -1,4 +1,4 @@
-package com.example.milsaborescompose
+package com.example.milsaborescompose.viewmodel
 
 import com.example.milsaborescompose.data.model.PaymentMethod
 import com.example.milsaborescompose.data.model.User
@@ -6,7 +6,6 @@ import com.example.milsaborescompose.data.model.auth.LoginRequest
 import com.example.milsaborescompose.data.model.auth.LoginResponse
 import com.example.milsaborescompose.data.repository.SessionRepository
 import com.example.milsaborescompose.data.repository.UserRepository
-import com.example.milsaborescompose.viewmodel.UserViewModel
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery

@@ -1,4 +1,5 @@
-package com.example.milsaborescompose
+package com.example.milsaborescompose.repository
+
 import com.example.milsaborescompose.data.model.PaymentMethod
 import com.example.milsaborescompose.data.model.User
 import com.example.milsaborescompose.data.remote.UserService
